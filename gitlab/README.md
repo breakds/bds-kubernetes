@@ -58,8 +58,51 @@ for exposing them. All of the pods will be put in a namespace called
     
     This is recommended as typing `--namespace=gitlab` every time
     we issue an `kubectl` command is cumbersome.
+    
+2.  Persistent Disk for PostgreSQL
 
-2.  **PostgreSQL**
+    We absolutely do not want to lose our data if postgresql is down
+    or being restarted for upgrade. Therefore, we would like it to
+    store the data on a
+    [persistent disk](https://cloud.google.com/compute/docs/disks/).
+
+    The following command creates a persistent disk in Google Compute
+    Engine with capacity of 200GB.
+    
+    ```bash
+    $ cloud compute disks create --size 200GB gitlab-postgresql-disk
+    ```
+    
+    Note that I chose `gitlab-postgresql-disk` as the name for the
+    persistent disk.
+    
+    To make it available for Pods to attach, we need to create the
+    persistent volume and the persistent volume claim.
+    
+    This can be done with the following commands
+    
+    ```bash
+    $ kubectl create -f gitlab-postgresql-disk.yml
+    persistentvolume "gitlab-postgresql-disk" created
+    $ kubectl create -f gitlab-postgresql-disk-claim.yml 
+    persistentvolumeclaim "gitlab-postgresql-disk-claim" created
+    ```
+    
+    This can now be verified:
+    
+    ```bash
+    $ kubectl get pv
+    NAME                     CAPACITY   ACCESSMODES   RECLAIMPOLICY   STATUS    CLAIM                                 REASON    AGE
+    gitlab-postgresql-disk   200Gi      RWO           Retain          Bound     gitlab/gitlab-postgresql-disk-claim             9m
+    $ kubectl get pvc
+    NAME                           STATUS    VOLUME                   CAPACITY   ACCESSMODES   AGE
+    gitlab-postgresql-disk-claim   Bound     gitlab-postgresql-disk   200Gi      RWO           10s
+    ```
+
+    The instructions are mainly from Eric Oestrich's excellent
+    [blog post](https://blog.oestrich.org/2015/08/running-postgres-inside-kubernetes/).
+    
+3.  **PostgreSQL**
     
     *   Create the PostgreSQL service under namespace `gitlab`.
     
@@ -90,7 +133,7 @@ for exposing them. All of the pods will be put in a namespace called
         gitlab-postgresql   1         1         1            1           11m
         ```
         
-3.  **Redis**
+4.  **Redis**
 
     *   Create the Redis service under namespace `gitlab`.
     
@@ -124,7 +167,7 @@ for exposing them. All of the pods will be put in a namespace called
         gitlab-redis-3473415130-563lx        1/1       Running   0          29s
         ```
         
-4.  **GitLab**
+5.  **GitLab**
 
     *   Create the GitLab service under the namespace `gitlab`.
     
@@ -148,18 +191,30 @@ for exposing them. All of the pods will be put in a namespace called
         
     *   Deploy GitLab Pod.
     
-        Note that, you might want to change the environment variables
+        The deployment of GitLab is a bit more complicated than the
+        other ones because there are a lot of options to be set before
+        you can safely deploy it. Something notable are:
         
         *   TZ: Set to your timezone, such as `America/Los_Angeles`.
         *   GITLAB_TIMEZONE: See
             [all valid values](http://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html).
+        *   GITLAB_ROOT_PASSWORD: If not set, this can lead to the bug
+            described
+            [here](https://github.com/sameersbn/docker-gitlab/issues/657).
+        *   GITLAB\_SECRETS\_DB\_KEY\_BASE,
+            GITLAB\_SECRETS\_SECRET\_KEY\_BASE,
+            GITLAB\_SECRETS\_OTP\_KEY\_BASE: Generate one for each of
+            them with `pswgen -Bsv1 64`.
+            
+        The full description of all those options can be found at
+        [here](https://github.com/sameersbn/docker-gitlab#available-configuration-parameters).
     
         ```bash
         $ kubectl create -f gitlab-deployment.yml
         deployment "gitlab" created
         ```
 
-    
+
 
 
 

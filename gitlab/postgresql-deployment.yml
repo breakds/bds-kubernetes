@@ -15,10 +15,11 @@ spec:
       - name: postgresql
         image: sameersbn/postgresql:9.5-3
         env:
+        # Use your own username/password instead of the dummy ones here.
         - name: DB_USER
           value: gitlab
         - name: DB_PASS
-          value: passw0rd
+          value: password  
         - name: DB_NAME
           value: gitlab_production
         - name: DB_EXTENSION
@@ -51,4 +52,5 @@ spec:
           timeoutSeconds: 1
       volumes:
       - name: data
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: gitlab-postgresql-disk-claim

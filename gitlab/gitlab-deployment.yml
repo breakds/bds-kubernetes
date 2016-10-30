@@ -28,9 +28,9 @@ spec:
           value: WjNfLNct3gTNP9mmtfr93nwFTJHxmmjFj3HbR7Vdn4dTm7jdVJrhfhvrNHFn9FPC
         
         - name: GITLAB_ROOT_PASSWORD
-          value:
+          value: root
         - name: GITLAB_ROOT_EMAIL
-          value:
+          value: breakds@gmail.com
 
         - name: GITLAB_HOST
           value: git.breakds.org
@@ -61,7 +61,7 @@ spec:
         - name: DB_USER
           value: gitlab
         - name: DB_PASS
-          value: passw0rd
+          value: password
         - name: DB_NAME
           value: gitlab_production
 
