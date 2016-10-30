@@ -21,7 +21,8 @@ for exposing them. All of the pods will be put in a namespace called
 1.  Create the namespace `gitlab`.
 
     ```bash
-    kubectl create namespace gitlab
+    $ kubectl create namespace gitlab
+    namespace "gitlab" created
     ```
     
     This can be verified by running
@@ -32,8 +33,31 @@ for exposing them. All of the pods will be put in a namespace called
     default       Active    10h
     gitlab        Active    10m
     kube-system   Active    10h
-
     ```
+    
+            
+    Note that `kubectl` by default will only look at the namespace
+    `default`. Therefore, every command we issued such as `kubectl
+    get services` will only look at the namespace `deafult`. One
+    way to deal with this is to specify the namespace for each
+    command, as above. Another way is to set the context of
+    kubectl so that it will look at the namespace `gitlab` by
+    default. This can be done as following:
+    
+    ```bash
+    $ kubectl config current-context
+    gke_personal-servers-147616_us-west1-b_gitlab-cluster
+    ```
+    
+    This gives you the name of the current context. Now we can
+    attach the namespace `gitlab` to this context:
+    
+    ```bash
+    $ kubectl config set-context gke_personal-servers-147616_us-west1-b_gitlab-cluster --namespace=gitlab
+    ```
+    
+    This is recommended as typing `--namespace=gitlab` every time
+    we issue an `kubectl` command is cumbersome.
 
 2.  **PostgreSQL**
     
@@ -47,34 +71,10 @@ for exposing them. All of the pods will be put in a namespace called
         This can be verified by
         
         ```bash
-        $ kubectl get services --namespace=gitlab
+        $ kubectl get services
         NAME                CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
         gitlab-postgresql   10.3.252.137   <none>        5432/TCP   21m
         ```
-        
-        Note that `kubectl` by default will only look at the namespace
-        `default`. Therefore, every command we issued such as `kubectl
-        get services` will only look at the namespace `deafult`. One
-        way to deal with this is to specify the namespace for each
-        command, as above. Another way is to set the context of
-        kubectl so that it will look at the namespace `gitlab` by
-        default. This can be done as following:
-        
-        ```bash
-        $ kubectl config current-context
-        gke_personal-servers-147616_us-west1-b_gitlab-cluster
-        ```
-        
-        This gives you the name of the current context. Now we can
-        attach the namespace `gitlab` to this context:
-        
-        ```bash
-        $ kubectl config set-context gke_personal-servers-147616_us-west1-b_gitlab-cluster --namespace=gitlab
-        ```
-        
-        This is recommended as typing `--namespace=gitlab` every time
-        we issue an `kubectl` command is cumbersome.
-    
     *   Deploy PostgreSQL Pod.
     
         ```bash
