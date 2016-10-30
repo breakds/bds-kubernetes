@@ -1,0 +1,126 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: gitlab
+  name: gitlab
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: gitlab
+        app: gitlab
+    spec:
+      containers:
+      - name: gitlab
+        image: sameersbn/gitlab:8.13.1
+        env:
+        - name: TZ
+          value: America/Los_Angeles
+        - name: GITLAB_TIMEZONE
+          value: "Pacific Time (US & Canada)"
+
+        - name: GITLAB_SECRETS_DB_KEY_BASE  # Randomly generated for DB encryption.
+          value: gJgP3C9sMxqbm37NKHHprqbRczkTcWC3X3CTm3xM9KWwsKKhgzbr7krCVrNrT4mk
+        - name: GITLAB_SECRETS_SECRET_KEY_BASE
+          value: mhk9ksdJtbCrHhKMjjjfsMnjdq7pqh39PNXJLMRW7Tfjhkdmt9tLn4jpjkCdjqFP
+        - name: GITLAB_SECRETS_OTP_KEY_BASE
+          value: WjNfLNct3gTNP9mmtfr93nwFTJHxmmjFj3HbR7Vdn4dTm7jdVJrhfhvrNHFn9FPC
+        
+        - name: GITLAB_ROOT_PASSWORD
+          value:
+        - name: GITLAB_ROOT_EMAIL
+          value:
+
+        - name: GITLAB_HOST
+          value: git.breakds.org
+        - name: GITLAB_PORT
+          value: "80"
+        - name: GITLAB_SSH_HOST
+          value: "ssh-git.breakds.org"
+        - name: GITLAB_SSH_PORT
+          value: "22"
+
+        - name: GITLAB_NOTIFY_ON_BROKEN_BUILDS
+          value: "true"
+        - name: GITLAB_NOTIFY_PUSHER
+          value: "false"
+
+        - name: GITLAB_BACKUP_SCHEDULE
+          value: daily
+        - name: GITLAB_BACKUP_TIME
+          value: 01:00
+
+        # PostgreSQL Setup
+        - name: DB_TYPE
+          value: postgres
+        - name: DB_HOST
+          value: gitlab-postgresql
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: gitlab
+        - name: DB_PASS
+          value: passw0rd
+        - name: DB_NAME
+          value: gitlab_production
+
+        # Redis Setup
+        - name: REDIS_HOST
+          value: gitlab-redis
+        - name: REDIS_PORT
+          value: "6379"
+
+        - name: SMTP_ENABLED
+          value: "false"
+        - name: SMTP_DOMAIN
+          value: ""
+        - name: SMTP_PORT
+          value: ""
+        - name: SMTP_USER
+          value: ""
+        - name: SMTP_PASS
+          value: ""
+        - name: SMTP_STARTTLS
+          value: "true"
+        - name: SMTP_AUTHENTICATION
+          value: login
+
+        - name: IMAP_ENABLED
+          value: "false"
+        - name: IMAP_HOST
+          value: imap.gmail.com
+        - name: IMAP_PORT
+          value: "993"
+        - name: IMAP_USER
+          value: breakds@gmail.com
+        - name: IMAP_PASS
+          value: password
+        - name: IMAP_SSL
+          value: "true"
+        - name: IMAP_STARTTLS
+          value: "false"
+          
+        ports:
+        - name: http
+          containerPort: 80
+        - name: ssh
+          containerPort: 22
+        volumeMounts:
+        - mountPath: /home/git/data
+          name: data
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 180
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+      volumes:
+      - name: data
+        emptyDir: {}
