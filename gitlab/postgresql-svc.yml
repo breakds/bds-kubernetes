@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: gitlab
+  name: gitlab-postgresql
+  labels:
+    name: gitlab-postgresql  # labels can be matched in selectors
+spec:
+  ports:
+    - name: postgres  # all ports within a ServiceSpec must have unique names
+      port: 5432
+      targetPort: postgres
+  selector:
+    name: gitlab-postgresql  # Specify the set of Pods targeted by this service
