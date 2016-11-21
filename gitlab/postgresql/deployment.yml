@@ -19,7 +19,7 @@ spec:
         - name: DB_USER
           value: gitlab
         - name: DB_PASS
-          value: password  
+          value: youwontknow
         - name: DB_NAME
           value: gitlab_production
         - name: DB_EXTENSION
@@ -53,4 +53,4 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: gitlab-postgresql-disk-claim
+          claimName: gitlab-postgresql-data-disk-claim

@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: gitlab
-        image: sameersbn/gitlab:8.13.1
+        image: sameersbn/gitlab:8.13.5
         env:
         - name: TZ
           value: America/Los_Angeles
@@ -61,7 +61,7 @@ spec:
         - name: DB_USER
           value: gitlab
         - name: DB_PASS
-          value: password
+          value: youwontknow
         - name: DB_NAME
           value: gitlab_production
 
@@ -123,4 +123,5 @@ spec:
           timeoutSeconds: 1
       volumes:
       - name: data
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: gitlab-data-disk-claim
